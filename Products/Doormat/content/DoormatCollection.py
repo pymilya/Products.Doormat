@@ -39,8 +39,9 @@ schema = Schema((
             label_msgid='Doormat_label_collection',
             i18n_domain='Doormat',
         ),
-        allowed_types="('Topic')",
+        allowed_types=('Topic', 'Collection'),
         relationship="internally_references_to_collection",
+        required=1
     ),
     ReferenceField(
         name='showMoreLink',

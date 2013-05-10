@@ -6,6 +6,7 @@ from Products.CMFPlone import utils
 from Products.Five import BrowserView
 from Products.CMFDynamicViewFTI.browserdefault import BrowserDefaultMixin
 
+
 class DoormatView(BrowserView):
     """
     """
@@ -17,7 +18,7 @@ class DoormatView(BrowserView):
         if self.context.getShowTitle():
             title = self.context.Title()
         return title
-         
+
     def getDoormatData(self):
         """ Return a dictionary like this:
         data = [
@@ -40,22 +41,16 @@ class DoormatView(BrowserView):
         data = []
         # Fetch Columns
         for column in doormat.contentValues():
-            column_dict = {
-                'column_title': column.Title(),
-                'show_title': column.getShowTitle(),
-                }
+            column_dict = {'column_title': column.Title(),
+                           'show_title': column.getShowTitle()}
             column_sections = []
             sections = column.contentValues()
-
             # Fetch Categories from Column
             for section in sections:
-                section_dict = {
-                    'section_title': section.Title(),
-                    'show_title': section.getShowTitle(),
-                    }
+                section_dict = {'section_title': section.Title(),
+                                'show_title': section.getShowTitle()}
                 section_links = []
                 objs = section.contentValues()
-
                 # Loop over all link object in category
                 for item in objs:
                     # Use the link item's title, not that of the linked content
@@ -63,7 +58,6 @@ class DoormatView(BrowserView):
                     text = ''
                     url = ''
                     link_class = ''
-
                     if item.portal_type == 'DoormatReference':
                         linked_item = item.getInternal_link()
                         if not linked_item:
@@ -76,49 +70,37 @@ class DoormatView(BrowserView):
                     elif item.portal_type == "Document":
                         text = item.getText()
                     elif item.portal_type == "DoormatCollection":
-                        if item.getCollection().portal_type == "Topic":
-                          results = self.getCollection(item)
-                      
-                          # Add links from collections
-                          for nitem in results:
-                              obj = nitem.getObject() 
-                            
-                              if (item.showTime):
-                                title = self.localizedTime(obj.modified()) + ' - ' + obj.title
-                              else: 
-                                title = obj.title
-                            
-                            
-                              section_links.append({
-                                  'content': '', 
-                                  'link_url': obj.absolute_url(), 
-                                  'link_title': title,
-                                  'link_class': 'collection-item',
-                                  })
-                         
-                          # Add the read more link if it is specified 
-                          if item.getShowMoreLink():
-                              section_links.append({
+                        if item.getCollection().portal_type in ("Topic", "Collection"):
+                            results = self.getCollection(item)
+                            # Add links from collections
+                            for nitem in results:
+                                obj = nitem.getObject() 
+                                if (item.showTime):
+                                    title = self.localizedTime(obj.modified()) + ' - ' + obj.title
+                                else:
+                                    title = obj.title
+                                section_links.append({
+                                            'content': '', 
+                                            'link_url': obj.absolute_url(),
+                                            'link_title': title,
+                                            'link_class': 'collection-item'})
+                            # Add the read more link if it is specified 
+                            if item.getShowMoreLink():
+                                section_links.append({
                                   'content': '',
                                   'link_url': item.getShowMoreLink().absolute_url(),
                                   'link_title': item.showMoreText,
-                                  'link_class': 'read-more'
-                              })  
-                        
-                          continue
+                                  'link_class': 'read-more'})
+                            continue
                         else:
-                          url = ''
-                          text = item.id+': This is not a collection, but a ' + item.getCollection().portal_type + ' :-)'
-                             
+                            url = ''
+                            text = item.id + ': This is not a collection, but a ' + item.getCollection().portal_type + ' :-)'
                     if not (text or url):
                         continue
-
-                    link_dict = {
-                        'content': text, 
-                        'link_url': url, 
-                        'link_title': title,
-                        'link_class': link_class,
-                        }
+                    link_dict = {'content': text,
+                                 'link_url': url,
+                                 'link_title': title,
+                                 'link_class': link_class}
                     section_links.append(link_dict)
                 section_dict['section_links'] = section_links
                 column_sections.append(section_dict)
@@ -127,16 +109,20 @@ class DoormatView(BrowserView):
         return data
 
     def getCollection(self, item):
-      if item.limit > 0:
-        results = item.getCollection().queryCatalog(sort_limit=item.limit)[:item.limit]
-      else:
-        results = item.getCollection().queryCatalog()
-        
-      return results
-      
+        limit = item.limit
+        item_collection = item.getCollection()
+        if item_collection.portal_type == "Collection":
+            if limit:
+                return item_collection.queryCatalog()._sequence[:item.limit]
+            return item_collection.queryCatalog()._sequence
+        else:
+            if limit and limit > 0:
+                return item_collection.queryCatalog(sort_limit=item.limit)
+            else:
+                return item_collection.queryCatalog()
+
     def localizedTime(self, time):
-      return getMultiAdapter((self.context, self.request), name="plone").toLocalizedTime(time)  
+        return getMultiAdapter((self.context, self.request), name="plone").toLocalizedTime(time)
 ##code-section module-footer #fill in your manual code here
 ##/code-section module-footer
-
 

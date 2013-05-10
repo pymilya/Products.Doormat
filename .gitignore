@@ -6,3 +6,6 @@
 *.pyc
 *.pyo
 .svn
+.project
+.pydevproject
+.settings/
