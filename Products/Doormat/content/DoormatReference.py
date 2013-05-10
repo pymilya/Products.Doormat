@@ -17,6 +17,7 @@ from Products.Archetypes.atapi import *
 from zope.interface import implements
 import interfaces
 
+from Products.ATContentTypes.content.base import ATCTContent
 from Products.CMFDynamicViewFTI.browserdefault import BrowserDefaultMixin
 
 from Products.Doormat.config import *
@@ -51,7 +52,7 @@ DoormatReference_schema = BaseSchema.copy() + \
 ##code-section after-schema #fill in your manual code here
 ##/code-section after-schema
 
-class DoormatReference(BaseContent, BrowserDefaultMixin):
+class DoormatReference(ATCTContent, BrowserDefaultMixin):
     """
     """
     security = ClassSecurityInfo()

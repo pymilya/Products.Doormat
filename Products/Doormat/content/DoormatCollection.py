@@ -18,6 +18,7 @@ from zope.interface import implements
 import interfaces
 
 from Products.CMFDynamicViewFTI.browserdefault import BrowserDefaultMixin
+from Products.ATContentTypes.content.base import ATCTContent
 
 from Products.Doormat.config import *
 
@@ -95,7 +96,7 @@ DoormatCollection_schema = BaseSchema.copy() + \
 ##code-section after-schema #fill in your manual code here
 ##/code-section after-schema
 
-class DoormatCollection(BaseContent, BrowserDefaultMixin):
+class DoormatCollection(ATCTContent, BrowserDefaultMixin):
     """
     """
     security = ClassSecurityInfo()
